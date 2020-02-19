@@ -8,62 +8,45 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
-from __future__ import division
-import numpy as np
-import matplotlib.pyplot as plt
 
+def rul3(dA, dB):
+    dQ = np.dqrt(dA**2 + dB**2)
+    return dQ
 
-def rule3(Aun, Bun):
-    Qun = np.sqrt(Aun**2 + Bun**2)
-    return Qun
-
-def rule4(Q, Ae, Be, Aun, Bun, A, B):
-    Qun = np.abs(Q)*np.sqrt(((Ae*Aun/A)**2)+((Be*Bun/B)**2))
-    return Qun
+#if q = cA^a B^b where c, m, n are constants, then
+def rul4(Q, A, dA, a, B, dB, b):
+    dQ = Q * np.sqrt(((a*(dA/A))**2) + (b*(dB/B))**2)
+    return dQ
 
 def lnbruteforce(A, Aun):
     lnAun = np.abs(np.log(np.average(A)) - np.log(np.average(A) + Aun))
     return lnAun
 
-def rul4(Q, A, dA, a, B, dB, b):
-    dQ = Q * np.sqrt(((a*(dA/A))**2) + (b*(dB/B))**2)
-    return dQ
     
-    
-r_array = np.array([1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6., 6.5, 7])
-V_array = np.array([3.7, 4.75, 5.35, 5.82, 6.65, 7.1, 7.5, 7.7, 8., 8.25, 8.55, 8.8, 9.13])
+r = np.array([1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5., 5.5, 6., 6.5, 7])
+V = np.array([3.7, 4.75, 5.35, 5.82, 6.65, 7.1, 7.5, 7.7, 8., 8.25, 8.55, 8.8, 9.13])
 
 r_un = .0005
 V_un = .05
 
 #Sigfigs to two places past decimal.
-dV = np.diff(V_array)
+dV = np.diff(V)
 dV_un = rule3(V_un, V_un)
-print('We had volt changes of', dV, 'with an uncertainty of +/-', '%.2f' % dV_un, 'volts.\n')
 
-#Sigfigs to three places past decimal.
-dr = np.diff(-1 * r_array)
+dr = np.diff(-1 * r)
 dr_un = rule3(r_un, r_un)
-print('We had constant changes in radius of', dr[11:], 'with an uncertainty of +/-', '%.3f' % dr_un, 'meters.\n')
-#One sigfig.
+
 Efield = ((-1 * dV)/dr)
 Efield_un = (rule4(Efield, 1, -1, dV_un, dr_un, dV, dr)); Efield_unp = np.around(Efield_un, 0)
-print('The strength of our electric fields (starting at .0675m) were:', Efield, '\n with uncertainties of +/-', Efield_unp, 'volts per meter.\n')
 
-#Three sigfigs?
-rmid = (.5 * (r_array[1:] + r_array[:-1]))
+rmid = (.5 * (r[1:] + r[:-1]))
 rmid_un = .5 * (rule3(r_un, r_un))
-print('The averages of our radii were:', rmid, 'with an uncertainty of +/-', '%.4f' % rmid_un, 'meters.\n')
 
-#One sigfig.
 lnEfield = np.log(Efield); lnEfieldp = np.around(lnEfield, 2)
 lnEfield_un = lnbruteforce(Efield, Efield_un); lnEfield_unp = np.around(lnEfield_un, 2)
-print ('ln Electric Fields:', lnEfieldp, '\n with uncertainties of +/-', lnEfield_unp, '.\n')
 
-#Three sigfigs?
 lnrmid = np.log(rmid); lnrmidp = np.around(lnrmid, 2)
 lnrmid_un = lnbruteforce(rmid, rmid_un)
-print ('ln Average Radii:', lnrmidp, 'with an uncertainty of +/-', '%.2f' % lnrmid_un, '.\n')
 x = lnrmid   #this should be the array you want to plot on the x axis
 y = lnEfield
 dy = lnEfield_un  #this should be your error in y array
@@ -94,6 +77,10 @@ def LLSFD2(x,y,dy):
     return N
                       
 N = LLSFD2(x,y,dy)
+print('Change in Voltage:', dV, '+/-', '%.2f' % dV_un, 'volts.\n')
+print('E-Field strength', Efield, ' +/-', Efield_unp, 'V/m.\n')
+print ('ln Electric Fields:', lnEfieldp, '+/-', lnEfield_unp, '.\n')
+print ('ln Average Radii:', lnrmidp, '+/-', '%.2f' % lnrmid_un, '.\n')
 
 #-----------------------------------------------------------------------#
 #Plot data on graph. Plot error bars and place values for slope, error in slope and goodness of fit on the plot using "annotate"
